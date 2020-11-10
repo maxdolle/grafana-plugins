@@ -1,7 +1,7 @@
 {
   "type": "datasource",
-  "name": "websocket-source",
-  "id": "next-mind-websocket-source",
+  "name": "Websocket Source",
+  "id": "maxdolle-websocket-source",
   "metrics": true,
   "info": {
     "description": "Consume realtime data from websocket",

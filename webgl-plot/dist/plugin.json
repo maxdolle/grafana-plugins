@@ -1,9 +1,9 @@
 {
   "type": "panel",
-  "name": "webgl-plot",
-  "id": "next-mind-webgl-plot",
+  "name": "WebGL Plot",
+  "id": "maxdolle-webgl-plot",
   "info": {
-    "description": "Very basic line plots with webgl-plot",
+    "description": "Multi-line high-performance 2D graph using native WebGL",
     "author": {
       "name": "Maxence Dolle",
       "url": ""
@@ -16,11 +16,11 @@
     "links": [
       {
         "name": "Website",
-        "url": "https://github.com/grafana/simple-react-panel"
+        "url": "https://github.com/maxdolle/grafana-plugins/webgl-plot"
       },
       {
         "name": "License",
-        "url": "https://github.com/grafana/simple-react-panel/blob/master/LICENSE"
+        "url": "https://github.com/maxdolle/grafana-plugins/webgl-plot/blob/master/LICENSE"
       }
     ],
     "screenshots": [],
@@ -28,7 +28,7 @@
     "updated": "2020-11-10"
   },
   "dependencies": {
-    "grafanaVersion": "7.0.x",
+    "grafanaVersion": "7.3.x",
     "plugins": []
   }
 }
