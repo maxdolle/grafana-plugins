@@ -1,0 +1,36 @@
+{
+  "type": "datasource",
+  "name": "websocket-source",
+  "id": "next-mind-websocket-source",
+  "metrics": true,
+  "info": {
+    "description": "Consume realtime data from websocket",
+    "author": {
+      "name": "Maxence Dolle",
+      "url": "https://next-mind.com"
+    },
+    "keywords": [],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://github.com/grafana/simple-datasource"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/grafana/simple-datasource/blob/master/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaVersion": "7.0.1",
+    "plugins": []
+  },
+  "streaming": true
+}

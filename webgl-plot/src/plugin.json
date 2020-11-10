@@ -1,0 +1,34 @@
+{
+  "type": "panel",
+  "name": "WebGL Plot",
+  "id": "maxdolle-webgl-plot",
+  "info": {
+    "description": "Multi-line high-performance 2D graph using native WebGL",
+    "author": {
+      "name": "Maxence Dolle",
+      "url": ""
+    },
+    "keywords": [],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://github.com/maxdolle/grafana-plugins/webgl-plot"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/maxdolle/grafana-plugins/webgl-plot/blob/master/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaVersion": "7.3.x",
+    "plugins": []
+  }
+}

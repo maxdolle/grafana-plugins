@@ -1,0 +1,34 @@
+{
+  "type": "panel",
+  "name": "webgl-plot",
+  "id": "next-mind-webgl-plot",
+  "info": {
+    "description": "Very basic line plots with webgl-plot",
+    "author": {
+      "name": "Maxence Dolle",
+      "url": ""
+    },
+    "keywords": [],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://github.com/grafana/simple-react-panel"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/grafana/simple-react-panel/blob/master/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "1.0.0",
+    "updated": "2020-11-10"
+  },
+  "dependencies": {
+    "grafanaVersion": "7.0.x",
+    "plugins": []
+  }
+}

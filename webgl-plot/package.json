@@ -1,0 +1,29 @@
+{
+  "name": "next-mind-webgl-plot",
+  "version": "1.0.0",
+  "description": "Very basic line plots with webgl-plot",
+  "scripts": {
+    "build": "grafana-toolkit plugin:build",
+    "test": "grafana-toolkit plugin:test",
+    "dev": "grafana-toolkit plugin:dev",
+    "watch": "grafana-toolkit plugin:dev --watch"
+  },
+  "repository": "github:grafana/simple-react-panel",
+  "author": "maxdolle",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/grafana/simple-react-panel/issues",
+    "email": "plugins@grafana.com"
+  },
+  "devDependencies": {
+    "@grafana/data": "^7.3.0",
+    "@grafana/runtime": "^7.3.0",
+    "@grafana/toolkit": "^7.3.0",
+    "@grafana/ui": "^7.3.0",
+    "emotion": "10.0.27",
+    "webgl-plot": "0.5.2"
+  },
+  "engines": {
+    "node": ">=12 <13"
+  }
+}
