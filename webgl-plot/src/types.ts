@@ -2,6 +2,6 @@ type SeriesSize = 'sm' | 'md' | 'lg';
 
 export interface SimpleOptions {
   text: string;
-  showSeriesCount: boolean;
+  subtractMean: boolean;
   seriesCountSize: SeriesSize;
 }

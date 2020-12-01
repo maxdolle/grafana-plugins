@@ -11,10 +11,12 @@ export default class WebGLGraph {
   scaling?: number;
   nPoints: number;
   nLines: number;
+  subtractMean: boolean;
 
-  constructor(canvas: HTMLCanvasElement, data: PanelData) {
+  constructor(canvas: HTMLCanvasElement, data: PanelData, subtractMean: boolean) {
     this.webGLPlot = new WebGLPlot(canvas);
     this.data = data;
+    this.subtractMean = subtractMean;
 
     this.lines = [];
     this.scaling = undefined;
@@ -79,9 +81,7 @@ export default class WebGLGraph {
       this.reconfigure();
     }
 
-    this.setScaling(this.getAutoScaling(dataPoints));
-
-    const scaling = this.scaling !== undefined ? this.scaling : this.getAutoScaling(dataPoints);
+    const scaling = this.scaling || this.getAutoScaling(dataPoints);
     /*
     // If scaling is not set, compute the max value on the current chunk of data
     if (this.scaling === undefined) {
@@ -101,7 +101,12 @@ export default class WebGLGraph {
       if (line.enabled) {
         line.setScaling(scaling * this.nLines * 1.1);
 
-        let offset = -dataPoints[lineId].reduce((x, y) => x + y, 0) / dataPoints[lineId].length;
+        let offset = 0;
+
+        if (this.subtractMean) {
+          offset -= mean(dataPoints[lineId]);
+        }
+
         offset /= scaling * this.nLines * 1.1;
         const lineOffset = 1 - ((0.5 + lineId) * 2) / this.nLines;
 
@@ -120,9 +125,20 @@ export default class WebGLGraph {
 
   getAutoScaling(dataPoints: number[][]) {
     // Set scaling as the maximum absolute value over the last second
-    let scaling = Math.max(...dataPoints.map(values => Math.max(...values.map(Math.abs))));
+    let scaling = Math.max(
+      ...dataPoints.map(values => {
+        // Subtract mean value to each value of necessary
+        const meanVal = this.subtractMean ? mean(values) : 0;
+        return Math.max(...values.map(x => Math.abs(x - meanVal)));
+      })
+    );
+
     scaling = scaling > 0 ? scaling : 1;
 
     return scaling;
   }
+}
+
+function mean(arr: number[]): number {
+  return arr.reduce((x, y) => x + y, 0) / arr.length;
 }

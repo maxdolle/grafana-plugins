@@ -9,29 +9,57 @@ interface Props extends PanelProps<SimpleOptions> {}
 
 export class SimplePanel extends PureComponent<Props> {
   myCanvasRef: React.RefObject<HTMLCanvasElement>;
+  myDivRef: React.RefObject<HTMLDivElement>;
   webGLGraph?: WebGLGraph;
+  lastWheelTime: Date;
 
   constructor(props: Props) {
     super(props);
     this.myCanvasRef = React.createRef<HTMLCanvasElement>();
+    this.myDivRef = React.createRef<HTMLDivElement>();
+    this.lastWheelTime = new Date();
   }
 
   componentDidMount() {
     const canvas = this.myCanvasRef.current as HTMLCanvasElement;
-    const { data } = this.props;
+    const { data, options } = this.props;
 
-    this.webGLGraph = new WebGLGraph(canvas, data);
+    this.webGLGraph = new WebGLGraph(canvas, data, options.subtractMean);
   }
 
-  onCanvasScroll(event: React.UIEvent<HTMLCanvasElement, UIEvent>) {
+  onCanvasScroll(event: React.WheelEvent<HTMLCanvasElement>) {
     console.log(event);
-    this.webGLGraph?.setScaling((this.webGLGraph!.scaling || 1) * 1.2);
+    console.log(event.deltaY);
+
+    const webGLGraph: WebGLGraph = this.webGLGraph!;
+
+    if (new Date().getTime() - this.lastWheelTime.getTime() > 100) {
+      const val = event.deltaY > 0 ? 1 : -1;
+      if (webGLGraph.scaling === undefined) {
+        webGLGraph.scaling = webGLGraph.getAutoScaling(webGLGraph.getData());
+      }
+
+      this.webGLGraph!.setScaling(webGLGraph.scaling * (1 + 3 / 10) ** val);
+
+      const div = this.myDivRef.current as HTMLDivElement;
+      div.innerText = `scaling: ${webGLGraph.scaling}`;
+
+      this.lastWheelTime = new Date();
+    }
+    event.preventDefault();
   }
 
   render() {
     const styles = getStyles();
 
-    const { options, width, height, data } = this.props;
+    const { width, height } = this.props;
+    const canvas = this.myCanvasRef.current as HTMLCanvasElement;
+
+    // If graph size changed, adapt webgl viewport
+    if (this.webGLGraph !== undefined && (canvas.width !== width || canvas.height !== height)) {
+      const webGLGraph: WebGLGraph = this.webGLGraph!;
+      webGLGraph.webGLPlot.viewport(0, 0, width, height);
+    }
 
     return (
       <div
@@ -46,13 +74,14 @@ export class SimplePanel extends PureComponent<Props> {
         <canvas ref={this.myCanvasRef} width={width} height={height} onWheel={ev => this.onCanvasScroll(ev)} />
 
         <div className={styles.textBox}>
-          {options.showSeriesCount && <div>Number of series: {data.series.length}</div>}
-          <div>Text option value: {options.text}</div>
+          <div ref={this.myDivRef}>Scaling: ?</div>
         </div>
       </div>
     );
   }
 }
+
+//          {options.showSeriesCount && <div>Number of series: {data.series.length}</div>}
 
 const getStyles = stylesFactory(() => {
   return {
