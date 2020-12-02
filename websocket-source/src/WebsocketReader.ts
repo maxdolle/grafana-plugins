@@ -2,7 +2,6 @@ export interface NMConfiguration {
   type: string;
   chNames: string[];
   sfreq: number;
-  ylim?: number[];
 }
 
 export interface NMConfigurations {
@@ -87,13 +86,14 @@ export class WebSocketReader {
         type: msg.type,
         chNames: msg.ch_names,
         sfreq: msg.sfreq,
-        ylim: msg.ylim,
       };
       this.buffers[msg.type] = [];
       this.onNewConfiguration(this.configurations[msg.type]);
     }
 
+    // Process data if the configuration has been received
     if (msg.data !== undefined && msg.data.length > 0 && this.configurations[msg.type] !== undefined) {
+      // Format as NMRows
       const rows: NMRow[] = msg.data.map((values: number[], i: number) => {
         return {
           vals: values,
@@ -102,8 +102,10 @@ export class WebSocketReader {
         };
       });
 
+      // Process rows
       const data = this.pushRows(msg.type, rows);
 
+      // Emit new data to be displayed
       if (data.length > 0) {
         this.onNewData(msg.type, data);
       }
@@ -111,6 +113,7 @@ export class WebSocketReader {
   }
 
   pushRows(type: string, newRows: NMRow[]): any {
+    // Process data
     this.buffers[type].push(...newRows);
 
     const rows = this.buffers[type];
@@ -174,6 +177,13 @@ function reduceRows(rows: NMRow[], method: string | ((x: number, y: number) => n
   if (method === 'first') {
     return rows[0];
   }
+  if (method === 'count') {
+    return {
+      timestamp: Math.min(...rows.map(row => row.timestamp)),
+      sample: Math.min(...rows.map(row => row.sample)),
+      vals: rows[0].vals.map(_ => rows.length),
+    };
+  }
 
   if (typeof method === 'string') {
     throw Error(`Unknown method {method}`);
@@ -181,8 +191,8 @@ function reduceRows(rows: NMRow[], method: string | ((x: number, y: number) => n
 
   return rows.reduce((x, y) => {
     return {
-      timestamp: Math.min(...[x.timestamp, y.timestamp]),
-      sample: Math.min(...[x.timestamp, y.timestamp]),
+      timestamp: Math.min(x.timestamp, y.timestamp),
+      sample: Math.min(x.timestamp, y.timestamp),
       vals: x.vals.map((_, i) => method(x.vals[i], y.vals[i])),
     };
   });

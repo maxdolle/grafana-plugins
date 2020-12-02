@@ -28,9 +28,6 @@ export class SimplePanel extends PureComponent<Props> {
   }
 
   onCanvasScroll(event: React.WheelEvent<HTMLCanvasElement>) {
-    console.log(event);
-    console.log(event.deltaY);
-
     const webGLGraph: WebGLGraph = this.webGLGraph!;
 
     if (new Date().getTime() - this.lastWheelTime.getTime() > 100) {
@@ -42,11 +39,16 @@ export class SimplePanel extends PureComponent<Props> {
       this.webGLGraph!.setScaling(webGLGraph.scaling * (1 + 3 / 10) ** val);
 
       const div = this.myDivRef.current as HTMLDivElement;
-      div.innerText = `scaling: ${webGLGraph.scaling}`;
+      div.innerText = `scaling: ${webGLGraph.scaling.toPrecision(4)}`;
 
       this.lastWheelTime = new Date();
     }
     event.preventDefault();
+  }
+  shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<{}>, nextContext: any): boolean {
+    const { width, height } = this.props;
+
+    return nextProps.width !== width || nextProps.height !== height;
   }
 
   render() {
@@ -98,6 +100,7 @@ const getStyles = stylesFactory(() => {
       bottom: 0;
       left: 0;
       padding: 10px;
+      background-color: rgba(0, 0, 0, 0.4);
     `,
   };
 });

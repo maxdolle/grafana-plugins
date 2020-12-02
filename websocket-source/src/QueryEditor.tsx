@@ -41,6 +41,7 @@ export class QueryEditor extends PureComponent<Props> {
       { label: 'max', value: 'max' },
       { label: 'first', value: 'first' },
       { label: 'last', value: 'last' },
+      { label: 'count', value: 'count' },
     ];
     return (
       <>

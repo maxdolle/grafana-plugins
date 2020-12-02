@@ -8465,6 +8465,9 @@ function (_super) {
     }, {
       label: 'last',
       value: 'last'
+    }, {
+      label: 'count',
+      value: 'count'
     }];
     return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_2___default.a.Fragment, null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["InlineFieldRow"], null, react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["InlineField"], {
       label: "Websocket Host"
@@ -8561,22 +8564,24 @@ function () {
       this.configurations[msg.type] = {
         type: msg.type,
         chNames: msg.ch_names,
-        sfreq: msg.sfreq,
-        ylim: msg.ylim
+        sfreq: msg.sfreq
       };
       this.buffers[msg.type] = [];
       this.onNewConfiguration(this.configurations[msg.type]);
-    }
+    } // Process data if the configuration has been received
+
 
     if (msg.data !== undefined && msg.data.length > 0 && this.configurations[msg.type] !== undefined) {
+      // Format as NMRows
       var rows = msg.data.map(function (values, i) {
         return {
           vals: values,
           timestamp: msg.timestamps[i],
           sample: msg.samples[i]
         };
-      });
-      var data = this.pushRows(msg.type, rows);
+      }); // Process rows
+
+      var data = this.pushRows(msg.type, rows); // Emit new data to be displayed
 
       if (data.length > 0) {
         this.onNewData(msg.type, data);
@@ -8587,7 +8592,8 @@ function () {
   WebSocketReader.prototype.pushRows = function (type, newRows) {
     var _a;
 
-    var _this = this;
+    var _this = this; // Process data
+
 
     (_a = this.buffers[type]).push.apply(_a, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spread"])(newRows));
 
@@ -8669,14 +8675,28 @@ function reduceRows(rows, method) {
     return rows[0];
   }
 
+  if (method === 'count') {
+    return {
+      timestamp: Math.min.apply(Math, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spread"])(rows.map(function (row) {
+        return row.timestamp;
+      }))),
+      sample: Math.min.apply(Math, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spread"])(rows.map(function (row) {
+        return row.sample;
+      }))),
+      vals: rows[0].vals.map(function (_) {
+        return rows.length;
+      })
+    };
+  }
+
   if (typeof method === 'string') {
     throw Error("Unknown method {method}");
   }
 
   return rows.reduce(function (x, y) {
     return {
-      timestamp: Math.min.apply(Math, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spread"])([x.timestamp, y.timestamp])),
-      sample: Math.min.apply(Math, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spread"])([x.timestamp, y.timestamp])),
+      timestamp: Math.min(x.timestamp, y.timestamp),
+      sample: Math.min(x.timestamp, y.timestamp),
       vals: x.vals.map(function (_, i) {
         return method(x.vals[i], y.vals[i]);
       })

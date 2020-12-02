@@ -12,6 +12,7 @@ export default class WebGLGraph {
   nPoints: number;
   nLines: number;
   subtractMean: boolean;
+  lastProcessedTimestamp: number;
 
   constructor(canvas: HTMLCanvasElement, data: PanelData, subtractMean: boolean) {
     this.webGLPlot = new WebGLPlot(canvas);
@@ -20,9 +21,9 @@ export default class WebGLGraph {
 
     this.lines = [];
     this.scaling = undefined;
-
     this.nLines = 0;
     this.nPoints = 1;
+    this.lastProcessedTimestamp = 0;
 
     this.reconfigure();
 
@@ -41,9 +42,10 @@ export default class WebGLGraph {
     }
     const request = this.data.request;
     let nPoints = request.range.to.diff(request.range.from) / request.intervalMs;
+    nPoints = Math.ceil(nPoints);
 
     if (request.maxDataPoints !== undefined) {
-      nPoints = Math.min(...[nPoints, request.maxDataPoints]);
+      nPoints = Math.min(nPoints, request.maxDataPoints);
     }
 
     return nPoints;
@@ -74,7 +76,28 @@ export default class WebGLGraph {
       .reduce((x, y) => x.concat(y, []));
   }
 
+  /*
+   * Get last timestamp from any available time field, otherwise return 0
+   * */
+  getLastTimestamp(): number {
+    const lastTimestamps = this.data.series.map(series => {
+      const timeFields = series.fields.filter(field => field.type === 'time');
+      if (timeFields.length > 0) {
+        return timeFields[0].values.toArray()[timeFields[0].values.length - 1];
+      }
+      return 0;
+    });
+
+    return Math.max(...lastTimestamps);
+  }
+
   update() {
+    // Be lazy and do not update if there is no new data
+    const lastTimestamp = this.getLastTimestamp();
+    if (lastTimestamp !== 0 && lastTimestamp === this.lastProcessedTimestamp) {
+      return false;
+    }
+
     const dataPoints: number[][] = this.getData();
 
     if (this.nPoints !== this.determineNPoints() || this.nLines !== dataPoints.length) {
@@ -116,6 +139,9 @@ export default class WebGLGraph {
         this.lines[lineId].setOffset(-100000);
       }
     }
+
+    this.lastProcessedTimestamp = lastTimestamp;
+
     return true;
   }
 

@@ -1035,8 +1035,6 @@ function (_super) {
   };
 
   SimplePanel.prototype.onCanvasScroll = function (event) {
-    console.log(event);
-    console.log(event.deltaY);
     var webGLGraph = this.webGLGraph;
 
     if (new Date().getTime() - this.lastWheelTime.getTime() > 100) {
@@ -1048,11 +1046,18 @@ function (_super) {
 
       this.webGLGraph.setScaling(webGLGraph.scaling * Math.pow(1 + 3 / 10, val));
       var div = this.myDivRef.current;
-      div.innerText = "scaling: " + webGLGraph.scaling;
+      div.innerText = "scaling: " + webGLGraph.scaling.toPrecision(4);
       this.lastWheelTime = new Date();
     }
 
     event.preventDefault();
+  };
+
+  SimplePanel.prototype.shouldComponentUpdate = function (nextProps, nextState, nextContext) {
+    var _a = this.props,
+        width = _a.width,
+        height = _a.height;
+    return nextProps.width !== width || nextProps.height !== height;
   };
 
   SimplePanel.prototype.render = function () {
@@ -1094,7 +1099,7 @@ var getStyles = Object(_grafana_ui__WEBPACK_IMPORTED_MODULE_3__["stylesFactory"]
   return {
     wrapper: Object(emotion__WEBPACK_IMPORTED_MODULE_2__["css"])(templateObject_2 || (templateObject_2 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__makeTemplateObject"])(["\n      position: relative;\n    "], ["\n      position: relative;\n    "]))),
     svg: Object(emotion__WEBPACK_IMPORTED_MODULE_2__["css"])(templateObject_3 || (templateObject_3 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__makeTemplateObject"])(["\n      position: absolute;\n      top: 0;\n      left: 0;\n    "], ["\n      position: absolute;\n      top: 0;\n      left: 0;\n    "]))),
-    textBox: Object(emotion__WEBPACK_IMPORTED_MODULE_2__["css"])(templateObject_4 || (templateObject_4 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__makeTemplateObject"])(["\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      padding: 10px;\n    "], ["\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      padding: 10px;\n    "])))
+    textBox: Object(emotion__WEBPACK_IMPORTED_MODULE_2__["css"])(templateObject_4 || (templateObject_4 = Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__makeTemplateObject"])(["\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      padding: 10px;\n      background-color: rgba(0, 0, 0, 0.4);\n    "], ["\n      position: absolute;\n      bottom: 0;\n      left: 0;\n      padding: 10px;\n      background-color: rgba(0, 0, 0, 0.4);\n    "])))
   };
 });
 var templateObject_1, templateObject_2, templateObject_3, templateObject_4;
@@ -1132,6 +1137,7 @@ function () {
     this.scaling = undefined;
     this.nLines = 0;
     this.nPoints = 1;
+    this.lastProcessedTimestamp = 0;
     this.reconfigure();
 
     var newFrame = function newFrame() {
@@ -1152,9 +1158,10 @@ function () {
 
     var request = this.data.request;
     var nPoints = request.range.to.diff(request.range.from) / request.intervalMs;
+    nPoints = Math.ceil(nPoints);
 
     if (request.maxDataPoints !== undefined) {
-      nPoints = Math.min.apply(Math, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spread"])([nPoints, request.maxDataPoints]));
+      nPoints = Math.min(nPoints, request.maxDataPoints);
     }
 
     return nPoints;
@@ -1187,8 +1194,34 @@ function () {
       return x.concat(y, []);
     });
   };
+  /*
+   * Get last timestamp from any available time field, otherwise return 0
+   * */
+
+
+  WebGLGraph.prototype.getLastTimestamp = function () {
+    var lastTimestamps = this.data.series.map(function (series) {
+      var timeFields = series.fields.filter(function (field) {
+        return field.type === 'time';
+      });
+
+      if (timeFields.length > 0) {
+        return timeFields[0].values.toArray()[timeFields[0].values.length - 1];
+      }
+
+      return 0;
+    });
+    return Math.max.apply(Math, Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__spread"])(lastTimestamps));
+  };
 
   WebGLGraph.prototype.update = function () {
+    // Be lazy and do not update if there is no new data
+    var lastTimestamp = this.getLastTimestamp();
+
+    if (lastTimestamp !== 0 && lastTimestamp === this.lastProcessedTimestamp) {
+      return false;
+    }
+
     var dataPoints = this.getData();
 
     if (this.nPoints !== this.determineNPoints() || this.nLines !== dataPoints.length) {
@@ -1229,6 +1262,7 @@ function () {
       }
     }
 
+    this.lastProcessedTimestamp = lastTimestamp;
     return true;
   };
 
