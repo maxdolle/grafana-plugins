@@ -25,10 +25,13 @@ export class SimplePanel extends PureComponent<Props> {
     const { data, options } = this.props;
 
     this.webGLGraph = new WebGLGraph(canvas, data, options.subtractMean);
+    canvas.addEventListener('wheel', (this.onCanvasScroll as unknown) as EventListener, { passive: false });
   }
 
-  onCanvasScroll(event: React.WheelEvent<HTMLCanvasElement>) {
+  onCanvasScroll = (event: React.WheelEvent<HTMLCanvasElement>) => {
     const webGLGraph: WebGLGraph = this.webGLGraph!;
+
+    event.preventDefault();
 
     if (new Date().getTime() - this.lastWheelTime.getTime() > 100) {
       const val = event.deltaY > 0 ? 1 : -1;
@@ -43,8 +46,7 @@ export class SimplePanel extends PureComponent<Props> {
 
       this.lastWheelTime = new Date();
     }
-    event.preventDefault();
-  }
+  };
   shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<{}>, nextContext: any): boolean {
     const { width, height } = this.props;
 
@@ -73,7 +75,7 @@ export class SimplePanel extends PureComponent<Props> {
           `
         )}
       >
-        <canvas ref={this.myCanvasRef} width={width} height={height} onWheel={ev => this.onCanvasScroll(ev)} />
+        <canvas ref={this.myCanvasRef} width={width} height={height} />
 
         <div className={styles.textBox}>
           <div ref={this.myDivRef}>Scaling: ?</div>

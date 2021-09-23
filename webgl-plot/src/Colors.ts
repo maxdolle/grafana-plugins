@@ -64,6 +64,10 @@ function interpolateColor(val: number, colors: number[][]) {
 }
 
 function createPalette(nColors: number): ColorRGBA[] {
+  if (nColors === 8) {
+    return createGrafanaPalette();
+  }
+
   const outColors = [];
 
   for (let i = 0; i < nColors; i += 1) {
@@ -79,6 +83,19 @@ function createPalette(nColors: number): ColorRGBA[] {
     outColors.push(color);
   }
   return outColors;
+}
+
+function createGrafanaPalette(): ColorRGBA[] {
+  return [
+    new ColorRGBA(0.38, 0.54, 0.34, 1),
+    new ColorRGBA(0.71, 0.56, 0.18, 1),
+    new ColorRGBA(0.34, 0.63, 0.68, 1),
+    new ColorRGBA(0.72, 0.4, 0.2, 1),
+    new ColorRGBA(0.68, 0.25, 0.21, 1),
+    new ColorRGBA(0.11, 0.37, 0.59, 1),
+    new ColorRGBA(0.57, 0.21, 0.52, 1),
+    new ColorRGBA(0.35, 0.29, 0.49, 1),
+  ];
 }
 
 export default createPalette;
